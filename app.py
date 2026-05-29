@@ -2,10 +2,12 @@ import re
 import streamlit as st
 
 from prompts.resume_prompt import build_resume_prompt
+from prompts.job_analysis_prompt import build_job_analysis_prompt
 from services.openai_client import generate_resume
 from services.file_storage import save_markdown, save_history
 from services.vision_parser import extract_job_posting_from_image
 from services.document_exporter import export_to_docx, export_to_pdf
+from services.job_analyzer import analyze_job_match
 
 
 st.set_page_config(
@@ -22,6 +24,9 @@ st.caption("職務経歴書を“伝わる文章”に変えるAIツール")
 if "extracted_job_posting" not in st.session_state:
     st.session_state.extracted_job_posting = ""
 
+if "job_analysis_result" not in st.session_state:
+    st.session_state.job_analysis_result = ""
+
 
 def extract_section(content: str, heading: str) -> str:
     """
@@ -34,6 +39,20 @@ def extract_section(content: str, heading: str) -> str:
 
     if match:
         return match.group(1).strip()
+
+    return ""
+
+
+def extract_match_rate(analysis_text: str) -> str:
+    """
+    求人分析結果から「マッチ率：〇〇%」を抜き出します。
+    見つからない場合は空文字を返します。
+    """
+
+    match = re.search(r"マッチ率[:：]\s*(\d{1,3})\s*%", analysis_text)
+
+    if match:
+        return match.group(1)
 
     return ""
 
@@ -66,6 +85,7 @@ def load_sales_sample():
     st.session_state.portfolio = "SNS投稿分析、簡易LP作成、ブログ記事作成などに取り組んでいます。"
     st.session_state.job_posting_input = ""
     st.session_state.extracted_job_posting = ""
+    st.session_state.job_analysis_result = ""
 
 
 def load_medical_engineer_sample():
@@ -111,6 +131,7 @@ def load_medical_engineer_sample():
 ・SNS投稿生成、分析ツール"""
     st.session_state.job_posting_input = ""
     st.session_state.extracted_job_posting = ""
+    st.session_state.job_analysis_result = ""
 
 
 with st.sidebar:
@@ -119,7 +140,7 @@ with st.sidebar:
         """
         1. 必要項目を入力  
         2. 求人票を文章 or スクショで入力  
-        3. 生成ボタンを押す  
+        3. 求人との相性を分析  
         4. 職務経歴書の下書きを作成  
         5. Markdown / Word / PDFで保存
         """
@@ -316,6 +337,7 @@ if st.session_state.extracted_job_posting:
 
     if st.button("読み取り結果をクリア"):
         st.session_state.extracted_job_posting = ""
+        st.session_state.job_analysis_result = ""
         st.rerun()
 
 
@@ -328,9 +350,75 @@ if st.session_state.extracted_job_posting:
 st.info(
     """
     求人票を文章またはスクショで入力すると、AIが求人内容に合わせて職務経歴書を調整します。
-    空欄でも生成できます。
+    空欄でも職務経歴書は生成できます。
     """
 )
+
+
+st.divider()
+
+st.subheader("求人分析")
+
+st.caption("求人票とあなたの経験を照らし合わせて、相性・不足スキル・強調ポイントを分析します。")
+
+if st.button("求人との相性を分析する"):
+    if not job_posting.strip():
+        st.error("求人票を入力してください。文章で貼り付けるか、スクショから読み取ってください。")
+
+    elif not current_job or not target_job:
+        st.error("現在の職種と転職希望職種を入力してください。")
+
+    else:
+        try:
+            with st.spinner("求人との相性を分析しています..."):
+                analysis_prompt = build_job_analysis_prompt(
+                    current_job=current_job,
+                    experience_years=experience_years,
+                    target_job=target_job,
+                    work_details=work_details,
+                    achievements=achievements,
+                    strengths=strengths,
+                    learning_skills=learning_skills,
+                    portfolio=portfolio,
+                    job_posting=job_posting,
+                )
+
+                analysis_result = analyze_job_match(analysis_prompt)
+                st.session_state.job_analysis_result = analysis_result
+
+            st.success("求人分析が完了しました。")
+
+        except ValueError as e:
+            st.error(str(e))
+
+        except Exception as e:
+            st.error("求人分析中にエラーが発生しました。")
+            st.code(str(e))
+
+
+if st.session_state.job_analysis_result:
+    st.subheader("求人分析結果")
+
+    match_rate = extract_match_rate(st.session_state.job_analysis_result)
+
+    if match_rate:
+        st.metric(
+            label="求人とのマッチ率",
+            value=f"{match_rate}%",
+        )
+
+    st.warning("マッチ率はAIによる目安です。合否や市場価値を保証するものではありません。")
+    st.markdown(st.session_state.job_analysis_result)
+
+    st.text_area(
+        "求人分析結果コピー用",
+        value=st.session_state.job_analysis_result,
+        height=320,
+    )
+
+    if st.button("求人分析結果をクリア"):
+        st.session_state.job_analysis_result = ""
+        st.rerun()
 
 
 st.divider()
