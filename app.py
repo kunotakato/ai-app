@@ -3,11 +3,13 @@ import streamlit as st
 
 from prompts.resume_prompt import build_resume_prompt
 from prompts.job_analysis_prompt import build_job_analysis_prompt
+from prompts.self_analysis_prompt import build_self_analysis_prompt
 from services.openai_client import generate_resume
 from services.file_storage import save_markdown, save_history
 from services.vision_parser import extract_job_posting_from_image
 from services.document_exporter import export_to_docx, export_to_pdf
 from services.job_analyzer import analyze_job_match
+from services.self_analyzer import analyze_self
 
 
 st.set_page_config(
@@ -18,7 +20,7 @@ st.set_page_config(
 
 
 st.title("📄 CareerCraft AI")
-st.caption("職務経歴書を“伝わる文章”に変えるAIツール")
+st.caption("職務経歴書を“伝わる文章”に変えるAI転職支援ツール")
 
 
 if "extracted_job_posting" not in st.session_state:
@@ -26,6 +28,9 @@ if "extracted_job_posting" not in st.session_state:
 
 if "job_analysis_result" not in st.session_state:
     st.session_state.job_analysis_result = ""
+
+if "self_analysis_result" not in st.session_state:
+    st.session_state.self_analysis_result = ""
 
 
 def extract_section(content: str, heading: str) -> str:
@@ -46,7 +51,6 @@ def extract_section(content: str, heading: str) -> str:
 def extract_match_rate(analysis_text: str) -> str:
     """
     求人分析結果から「マッチ率：〇〇%」を抜き出します。
-    見つからない場合は空文字を返します。
     """
 
     match = re.search(r"マッチ率[:：]\s*(\d{1,3})\s*%", analysis_text)
@@ -134,15 +138,59 @@ def load_medical_engineer_sample():
     st.session_state.job_analysis_result = ""
 
 
+def load_self_analysis_sample():
+    """
+    医療職からAI/ITエンジニアを目指す人向けの自己分析サンプルです。
+    """
+
+    st.session_state.enjoyable_work = """・ExcelやPythonで業務を効率化すること
+・現場の面倒な作業をどうすれば楽にできるか考えること
+・血液データや在庫数など、数字を見て改善点を考えること
+・自分で作ったツールが動いた瞬間"""
+    st.session_state.difficult_work = """・同じ作業を毎回手作業で繰り返すこと
+・改善余地があるのに変えられない環境
+・感覚だけで判断される仕事
+・目的が曖昧なまま進む作業"""
+    st.session_state.good_at = """・現場の課題を見つけること
+・物事を順序立てて整理すること
+・コツコツ学習すること
+・相手に分かりやすく説明すること"""
+    st.session_state.praised_for = """・記録や確認が丁寧
+・真面目に継続できる
+・改善案を考えられる
+・人に寄り添って説明できる"""
+    st.session_state.avoid_work_style = """・長時間労働が常態化している環境
+・教育体制がまったくない環境
+・根性論だけで進める環境
+・改善や提案が歓迎されない職場"""
+    st.session_state.interests = """・AI
+・データ分析
+・業務改善
+・医療DX
+・Pythonアプリ開発
+・機械学習"""
+    st.session_state.self_learning_skills = """・Python
+・Streamlit
+・pandas
+・SQLite
+・OpenAI API
+・Git / GitHub
+・機械学習の基礎"""
+    st.session_state.future_goal = """医療現場の経験を活かしながら、AIやデータ分析を使って現場課題を解決できるエンジニアになりたい。
+将来的には、業務改善ツールやAIシステムを作れる人材になりたい。"""
+    st.session_state.self_analysis_result = ""
+
+
 with st.sidebar:
     st.header("使い方")
     st.write(
         """
-        1. 必要項目を入力  
-        2. 求人票を文章 or スクショで入力  
-        3. 求人との相性を分析  
-        4. 職務経歴書の下書きを作成  
-        5. Markdown / Word / PDFで保存
+        1. 基本情報を入力  
+        2. 必要なら自己分析  
+        3. 求人票を文章 or スクショで入力  
+        4. 求人との相性を分析  
+        5. 職務経歴書を生成  
+        6. Markdown / Word / PDFで保存
         """
     )
 
@@ -162,7 +210,7 @@ with st.sidebar:
 
 st.subheader("サンプル入力")
 
-col_sample1, col_sample2 = st.columns(2)
+col_sample1, col_sample2, col_sample3 = st.columns(3)
 
 with col_sample1:
     if st.button("営業職 → Webマーケター サンプル"):
@@ -173,6 +221,11 @@ with col_sample2:
     if st.button("医療職 → AI/ITエンジニア サンプル"):
         load_medical_engineer_sample()
         st.success("医療職→エンジニア転職サンプルを反映しました。")
+
+with col_sample3:
+    if st.button("自己分析サンプル"):
+        load_self_analysis_sample()
+        st.success("自己分析サンプルを反映しました。")
 
 
 st.divider()
@@ -287,6 +340,117 @@ if career_change_mode:
         key="portfolio",
     )
 
+
+st.divider()
+
+st.subheader("自己分析・職種診断")
+
+st.caption("得意・苦手・興味から、向いている職種や転職軸を整理します。")
+
+enjoyable_work = st.text_area(
+    "楽しかった仕事・作業",
+    height=100,
+    placeholder="例：データを整理すること、業務改善を考えること、資料を分かりやすく作ること",
+    key="enjoyable_work",
+)
+
+difficult_work = st.text_area(
+    "苦手だった仕事・作業",
+    height=100,
+    placeholder="例：同じ作業の繰り返し、目的が曖昧な作業、感覚だけで進める仕事",
+    key="difficult_work",
+)
+
+good_at = st.text_area(
+    "得意だと思うこと",
+    height=100,
+    placeholder="例：整理すること、コツコツ続けること、人に説明すること",
+    key="good_at",
+)
+
+praised_for = st.text_area(
+    "人から褒められたこと",
+    height=100,
+    placeholder="例：丁寧、分かりやすい、責任感がある、改善案を出せる",
+    key="praised_for",
+)
+
+avoid_work_style = st.text_area(
+    "避けたい働き方",
+    height=100,
+    placeholder="例：長時間労働、教育体制がない、根性論が強い、改善提案しづらい環境",
+    key="avoid_work_style",
+)
+
+interests = st.text_area(
+    "興味のある分野",
+    height=100,
+    placeholder="例：AI、データ分析、Webマーケ、医療DX、業務改善",
+    key="interests",
+)
+
+self_learning_skills = st.text_area(
+    "学習中のスキル",
+    height=100,
+    placeholder="例：Python、Streamlit、SQL、Git、データ分析",
+    key="self_learning_skills",
+)
+
+future_goal = st.text_area(
+    "将来どうなりたいか",
+    height=100,
+    placeholder="例：AIやデータを使って現場課題を解決できる人材になりたい",
+    key="future_goal",
+)
+
+if st.button("自己分析する"):
+    if not enjoyable_work and not good_at and not interests:
+        st.error("自己分析に必要な情報が不足しています。楽しかった作業・得意なこと・興味のある分野のいずれかを入力してください。")
+
+    else:
+        try:
+            with st.spinner("自己分析・職種診断を実行しています..."):
+                self_prompt = build_self_analysis_prompt(
+                    enjoyable_work=enjoyable_work,
+                    difficult_work=difficult_work,
+                    good_at=good_at,
+                    praised_for=praised_for,
+                    avoid_work_style=avoid_work_style,
+                    interests=interests,
+                    learning_skills=self_learning_skills,
+                    future_goal=future_goal,
+                )
+
+                self_result = analyze_self(self_prompt)
+                st.session_state.self_analysis_result = self_result
+
+            st.success("自己分析が完了しました。")
+
+        except ValueError as e:
+            st.error(str(e))
+
+        except Exception as e:
+            st.error("自己分析中にエラーが発生しました。")
+            st.code(str(e))
+
+
+if st.session_state.self_analysis_result:
+    st.subheader("自己分析結果")
+    st.warning("診断結果はAIによる参考情報です。可能性を狭めすぎず、転職活動の整理材料として使ってください。")
+    st.markdown(st.session_state.self_analysis_result)
+
+    st.text_area(
+        "自己分析結果コピー用",
+        value=st.session_state.self_analysis_result,
+        height=360,
+    )
+
+    if st.button("自己分析結果をクリア"):
+        st.session_state.self_analysis_result = ""
+        st.rerun()
+
+
+st.divider()
 
 st.subheader("求人票入力")
 
