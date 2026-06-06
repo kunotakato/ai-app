@@ -5,6 +5,8 @@ from services.history_manager import init_db
 from pages.resume_page import render_resume_page
 from pages.job_analysis_page import render_job_analysis_page
 from pages.self_analysis_page import render_self_analysis_page
+from pages.interview_page import render_interview_page
+from pages.career_map_page import render_career_map_page
 from pages.history_page import render_history_page
 
 
@@ -24,9 +26,11 @@ with st.sidebar:
     page = st.radio(
         "ページ切り替え",
         [
-            "職務経歴書作成",
-            "求人分析",
+            "キャリア地図",
             "自己分析・職種診断",
+            "求人分析",
+            "職務経歴書作成",
+            "面接対策",
             "生成履歴",
         ],
     )
@@ -36,12 +40,12 @@ with st.sidebar:
     st.header("使い方")
     st.write(
         """
-        1. 基本情報を入力  
-        2. 必要なら自己分析  
-        3. 求人票を文章 or スクショで入力  
-        4. 求人分析  
-        5. 職務経歴書を生成  
-        6. 履歴で再確認
+        1. キャリア地図で現在地を整理  
+        2. 自己分析で強みを言語化  
+        3. 求人票を分析  
+        4. 職務経歴書を生成  
+        5. 面接対策を作成  
+        6. 生成履歴で再確認
         """
     )
 
@@ -59,14 +63,20 @@ with st.sidebar:
     )
 
 
-if page == "職務経歴書作成":
-    render_resume_page()
+if page == "キャリア地図":
+    render_career_map_page()
+
+elif page == "自己分析・職種診断":
+    render_self_analysis_page()
 
 elif page == "求人分析":
     render_job_analysis_page()
 
-elif page == "自己分析・職種診断":
-    render_self_analysis_page()
+elif page == "職務経歴書作成":
+    render_resume_page()
+
+elif page == "面接対策":
+    render_interview_page()
 
 elif page == "生成履歴":
     render_history_page()
