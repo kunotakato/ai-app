@@ -2,13 +2,12 @@ import streamlit as st
 
 from services.history_manager import init_db
 
-from pages.resume_page import render_resume_page
-from pages.job_analysis_page import render_job_analysis_page
-from pages.self_analysis_page import render_self_analysis_page
-from pages.interview_page import render_interview_page
-from pages.career_map_page import render_career_map_page
-from pages.history_page import render_history_page
-
+from app_pages.resume_page import render_resume_page
+from app_pages.job_analysis_page import render_job_analysis_page
+from app_pages.self_analysis_page import render_self_analysis_page
+from app_pages.interview_page import render_interview_page
+from app_pages.career_map_page import render_career_map_page
+from app_pages.history_page import render_history_page
 
 st.set_page_config(
     page_title="CareerCraft AI",

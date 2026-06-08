@@ -6,7 +6,7 @@ from services.file_storage import save_markdown, save_history
 from services.document_exporter import export_to_docx, export_to_pdf
 from services.history_manager import save_generation_history
 
-from pages.common import (
+from app_pages.common import init_session_state
     init_session_state,
     render_sample_buttons,
     render_basic_inputs,
