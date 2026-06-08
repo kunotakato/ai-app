@@ -6,8 +6,8 @@ from services.file_storage import save_markdown, save_history
 from services.document_exporter import export_to_docx, export_to_pdf
 from services.history_manager import save_generation_history
 
-from app_pages.common import 
-    (init_session_state,
+from app_pages.common import (
+    init_session_state,
     render_sample_buttons,
     render_basic_inputs,
     render_experience_inputs,
@@ -15,7 +15,6 @@ from app_pages.common import
     render_job_posting_inputs,
     extract_section,
 )
-
 
 def render_resume_page():
     """
