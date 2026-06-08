@@ -4,7 +4,8 @@ from prompts.job_analysis_prompt import build_job_analysis_prompt
 from services.job_analyzer import analyze_job_match
 from services.history_manager import save_generation_history
 
-from app_pages.common import init_session_state (
+from app_pages.common import (
+    init_session_state 
     render_sample_buttons,
     render_basic_inputs,
     render_experience_inputs,
