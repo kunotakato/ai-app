@@ -16,6 +16,7 @@ from app_pages.common import (
     extract_section,
 )
 
+
 def render_resume_page():
     """
     職務経歴書作成ページです。

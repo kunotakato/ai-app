@@ -5,7 +5,7 @@ from services.self_analyzer import analyze_self
 from services.history_manager import save_generation_history
 
 from app_pages.common import (
-    init_session_state
+    init_session_state,
     render_sample_buttons,
 )
 
