@@ -173,3 +173,5 @@ def render_resume_page():
             except Exception as e:
                 st.error("エラーが発生しました。入力内容やAPIキーを確認してください。")
                 st.code(str(e))
+
+st.success("次は「面接対策」に進みましょう。職務経歴書をもとに回答例を作成できます。")

@@ -1,9 +1,6 @@
 import base64
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from services.openai_client import get_openai_client
 
 
 def encode_image_to_base64(image_file):
@@ -20,14 +17,7 @@ def extract_job_posting_from_image(image_file):
     求人票スクショ画像から、求人情報を読み取る関数です。
     """
 
-    api_key = os.getenv("OPENAI_API_KEY")
-
-    if not api_key:
-        raise ValueError(
-            "OPENAI_API_KEY が設定されていません。.envファイルを確認してください。"
-        )
-
-    client = OpenAI(api_key=api_key)
+    client = get_openai_client()
 
     base64_image = encode_image_to_base64(image_file)
 

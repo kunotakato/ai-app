@@ -2,12 +2,14 @@ import streamlit as st
 
 from services.history_manager import init_db
 
+from app_pages.home_page import render_home_page
 from app_pages.resume_page import render_resume_page
 from app_pages.job_analysis_page import render_job_analysis_page
 from app_pages.self_analysis_page import render_self_analysis_page
 from app_pages.interview_page import render_interview_page
 from app_pages.career_map_page import render_career_map_page
 from app_pages.history_page import render_history_page
+
 
 st.set_page_config(
     page_title="CareerCraft AI",
@@ -25,6 +27,7 @@ with st.sidebar:
     page = st.radio(
         "ページ切り替え",
         [
+            "はじめに",
             "キャリア地図",
             "自己分析・職種診断",
             "求人分析",
@@ -39,6 +42,14 @@ with st.sidebar:
     st.header("使い方")
     st.write(
         """
+        初めて使う場合は、  
+        **はじめに → キャリア地図**  
+        の順番で進めてください。
+        """
+    )
+
+    st.markdown(
+        """
         1. キャリア地図で現在地を整理  
         2. 自己分析で強みを言語化  
         3. 求人票を分析  
@@ -51,18 +62,14 @@ with st.sidebar:
     st.warning(
         """
         個人情報・会社の機密情報は入力しすぎないでください。
-
-        入力を避けた方がよい例：
-        - 氏名
-        - 住所
-        - 電話番号
-        - 顧客名
-        - 社外秘情報
         """
     )
 
 
-if page == "キャリア地図":
+if page == "はじめに":
+    render_home_page()
+
+elif page == "キャリア地図":
     render_career_map_page()
 
 elif page == "自己分析・職種診断":

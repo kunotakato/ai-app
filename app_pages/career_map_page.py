@@ -138,3 +138,4 @@ def render_career_map_page():
             except Exception as e:
                 st.error("キャリア地図の作成中にエラーが発生しました。")
                 st.code(str(e))
+    st.success("次は「自己分析・職種診断」に進みましょう。")

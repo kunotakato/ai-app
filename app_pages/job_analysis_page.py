@@ -120,3 +120,5 @@ def render_job_analysis_page():
         if st.button("求人分析結果をクリア"):
             st.session_state.job_analysis_result = ""
             st.rerun()
+
+st.success("次は「職務経歴書作成」に進みましょう。求人に合わせた書類を作成できます。")

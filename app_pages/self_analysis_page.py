@@ -42,7 +42,7 @@ def render_self_analysis_page():
     good_at = st.text_area(
         "得意だと思うこと",
         height=100,
-        placeholder="例：整理すること、コツコツ続けること、人に説明すること",
+        placeholder="例：得意だと思うこと,人に分かりやすく説明すること,細かいミスに気づくこと,数字を見て改善点を考えること,チーム内で調整すること,コツコツ継続すること",
         key="good_at",
     )
 
@@ -133,3 +133,5 @@ def render_self_analysis_page():
         if st.button("自己分析結果をクリア"):
             st.session_state.self_analysis_result = ""
             st.rerun()
+
+st.success("次は「求人分析」に進みましょう。気になる求人票を貼り付けてください。")
