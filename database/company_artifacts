@@ -1,0 +1,11 @@
+CREATE TABLE company_artifacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT,
+    result TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE
+);

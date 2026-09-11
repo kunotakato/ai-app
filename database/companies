@@ -1,0 +1,12 @@
+CREATE TABLE companies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_name TEXT NOT NULL,
+    job_title TEXT,
+    job_url TEXT,
+    job_posting TEXT,
+    status TEXT NOT NULL DEFAULT '検討中',
+    priority INTEGER NOT NULL DEFAULT 3,
+    memo TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);

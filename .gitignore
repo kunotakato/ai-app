@@ -26,3 +26,8 @@ data/history.csv
 
 # Logs
 *.log
+
+# SQLite database
+database/*.db
+database/*.db-shm
+database/*.db-wal
